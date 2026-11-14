@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Das kleine Quiz</title>
+  <style>
+    /* ===== Farben: hier kannst du das ganze Design ändern ===== */
+    :root {
+      --hintergrund: #fff5f7;
+      --karte: #ffffff;
+      --text: #3b2a33;
+      --leise: #8a7480;
+      --akzent: #e05780;
+      --richtig: #2fa86b;
+      --falsch: #d9534f;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: var(--hintergrund);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    .karte {
+      width: 100%;
+      max-width: 440px;
+      background: var(--karte);
+      border-radius: 20px;
+      padding: 28px 22px;
+      box-shadow: 0 10px 30px rgba(224, 87, 128, 0.15);
+      text-align: center;
+    }
+
+    h1 { font-size: 1.6rem; margin: 0 0 8px; }
+    p  { line-height: 1.5; }
+    .emoji { font-size: 3rem; margin-bottom: 8px; }
+    .leise { color: var(--leise); font-size: 0.9rem; }
+
+    /* Fortschrittsbalken */
+    .balken { height: 8px; background: #f3dde4; border-radius: 99px; overflow: hidden; margin-bottom: 20px; }
+    .balken-fuellung { height: 100%; width: 0; background: var(--akzent); transition: width 0.4s; }
+
+    /* Buttons */
+    button {
+      font: inherit;
+      cursor: pointer;
+      border: none;
+      border-radius: 14px;
+    }
+    .haupt-button {
+      background: var(--akzent);
+      color: white;
+      font-weight: 600;
+      padding: 14px 28px;
+      margin-top: 12px;
+    }
+    .antworten { display: grid; gap: 10px; margin-top: 18px; }
+    .antwort {
+      background: #fbeef2;
+      color: var(--text);
+      padding: 14px;
+      text-align: left;
+      border: 2px solid transparent;
+      transition: transform 0.1s;
+    }
+    .antwort:active { transform: scale(0.98); }
+    .antwort.richtig { background: #e3f6ec; border-color: var(--richtig); }
+    .antwort.falsch  { background: #fbe5e4; border-color: var(--falsch); }
+    .antwort:disabled { cursor: default; }
+
+    .rueckmeldung { min-height: 1.5em; font-weight: 600; margin-top: 14px; }
+
+    .versteckt { display: none; }
+
+    /* Konfetti */
+    .konfetti {
+      position: fixed;
+      top: -20px;
+      width: 10px;
+      height: 14px;
+      animation: fallen linear forwards;
+      pointer-events: none;
+    }
+    @keyframes fallen {
+      to { transform: translateY(110vh) rotate(720deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <main class="karte">
+
+    <!-- ===== Bildschirm 1: Start ===== -->
+    <section id="start">
+      <div class="emoji">🎁</div>
+      <h1>Das kleine Quiz</h1>
+      <p>5 Fragen, ein bisschen Spaß und am Ende eine Überraschung.</p>
+      <button class="haupt-button" onclick="quizStarten()">Los geht's!</button>
+    </section>
+
+    <!-- ===== Bildschirm 2: Fragen ===== -->
+    <section id="quiz" class="versteckt">
+      <div class="balken"><div class="balken-fuellung" id="fortschritt"></div></div>
+      <p class="leise" id="zaehler"></p>
+      <h1 id="frage"></h1>
+      <div class="antworten" id="antworten"></div>
+      <p class="rueckmeldung" id="rueckmeldung"></p>
+      <button class="haupt-button versteckt" id="weiter" onclick="naechsteFrage()">Weiter</button>
+    </section>
+
+    <!-- ===== Bildschirm 3: Ergebnis ===== -->
+    <section id="ende" class="versteckt">
+      <div class="emoji">🎉</div>
+      <h1 id="ergebnis"></h1>
+      <p id="ergebnis-text"></p>
+      <button class="haupt-button" onclick="quizStarten()">Nochmal spielen</button>
+    </section>
+
+  </main>
+
+  <script>
+    // ===== Die Fragen: hier kannst du einfach eigene eintragen =====
+    // "richtig" ist die Nummer der richtigen Antwort (Zählung beginnt bei 0!)
+    const fragen = [
+      {
+        frage: "Welches Tier schläft bis zu 22 Stunden am Tag?",
+        antworten: ["Katze", "Koala", "Hund", "Pinguin"],
+        richtig: 1
+      },
+      {
+        frage: "Wie viele Herzen hat ein Oktopus?",
+        antworten: ["Eins", "Zwei", "Drei", "Acht"],
+        richtig: 2
+      },
+      {
+        frage: "Welche Frucht ist botanisch gesehen eine Beere?",
+        antworten: ["Erdbeere", "Banane", "Himbeere", "Kirsche"],
+        richtig: 1
+      },
+      {
+        frage: "In welchem Land wurde die Pizza Margherita erfunden?",
+        antworten: ["Spanien", "Frankreich", "Italien", "Griechenland"],
+        richtig: 2
+      },
+      {
+        frage: "Wie lange braucht Licht von der Sonne zur Erde?",
+        antworten: ["8 Sekunden", "8 Minuten", "8 Stunden", "8 Tage"],
+        richtig: 1
+      }
+    ];
+
+    // ===== Ab hier: die Spiel-Logik =====
+    let aktuelleFrage = 0;
+    let punkte = 0;
+
+    function zeige(id) {
+      for (const bereich of ["start", "quiz", "ende"]) {
+        document.getElementById(bereich).classList.toggle("versteckt", bereich !== id);
+      }
+    }
+
+    function quizStarten() {
+      aktuelleFrage = 0;
+      punkte = 0;
+      zeige("quiz");
+      frageAnzeigen();
+    }
+
+    function frageAnzeigen() {
+      const f = fragen[aktuelleFrage];
+      document.getElementById("zaehler").textContent = `Frage ${aktuelleFrage + 1} von ${fragen.length}`;
+      document.getElementById("frage").textContent = f.frage;
+      document.getElementById("fortschritt").style.width = (aktuelleFrage / fragen.length * 100) + "%";
+      document.getElementById("rueckmeldung").textContent = "";
+      document.getElementById("weiter").classList.add("versteckt");
+
+      const box = document.getElementById("antworten");
+      box.innerHTML = "";
+      f.antworten.forEach((text, nummer) => {
+        const knopf = document.createElement("button");
+        knopf.className = "antwort";
+        knopf.textContent = text;
+        knopf.onclick = () => antwortGeklickt(nummer);
+        box.appendChild(knopf);
+      });
+    }
+
+    function antwortGeklickt(nummer) {
+      const f = fragen[aktuelleFrage];
+      const knoepfe = document.querySelectorAll(".antwort");
+      const meldung = document.getElementById("rueckmeldung");
+
+      knoepfe.forEach(k => k.disabled = true);
+      knoepfe[f.richtig].classList.add("richtig");
+
+      if (nummer === f.richtig) {
+        punkte++;
+        meldung.textContent = "Richtig! 🥳";
+        meldung.style.color = "var(--richtig)";
+      } else {
+        knoepfe[nummer].classList.add("falsch");
+        meldung.textContent = "Leider falsch 🙈";
+        meldung.style.color = "var(--falsch)";
+      }
+
+      const weiter = document.getElementById("weiter");
+      weiter.textContent = aktuelleFrage === fragen.length - 1 ? "Zum Ergebnis" : "Weiter";
+      weiter.classList.remove("versteckt");
+    }
+
+    function naechsteFrage() {
+      aktuelleFrage++;
+      if (aktuelleFrage < fragen.length) {
+        frageAnzeigen();
+      } else {
+        ergebnisZeigen();
+      }
+    }
+
+    function ergebnisZeigen() {
+      zeige("ende");
+      document.getElementById("ergebnis").textContent = `${punkte} von ${fragen.length} richtig!`;
+      const texte = [
+        "Macht nichts, Hauptsache Spaß gehabt! 😄",
+        "Da geht noch was! 💪",
+        "Gar nicht schlecht! 👍",
+        "Stark! 🌟",
+        "Fast perfekt! 🔥",
+        "Perfekt! Du bist ein Genie! 🏆"
+      ];
+      document.getElementById("ergebnis-text").textContent = texte[punkte];
+      konfetti();
+    }
+
+    function konfetti() {
+      const farben = ["#e05780", "#ffb703", "#8ecae6", "#90be6d", "#c77dff"];
+      for (let i = 0; i < 80; i++) {
+        const stueck = document.createElement("div");
+        stueck.className = "konfetti";
+        stueck.style.left = Math.random() * 100 + "vw";
+        stueck.style.background = farben[i % farben.length];
+        stueck.style.animationDuration = (2 + Math.random() * 2) + "s";
+        stueck.style.animationDelay = Math.random() * 0.5 + "s";
+        document.body.appendChild(stueck);
+        setTimeout(() => stueck.remove(), 5000);
+      }
+    }
+  </script>
+
+</body>
+</html>
