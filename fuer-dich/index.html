@@ -185,6 +185,7 @@
     @keyframes aufsteigen {
       to { transform: translateY(-115vh) rotate(25deg); opacity: 0; }
     }
+    .schwebeherz.sonder { z-index: 2; opacity: 0.3 !important; }
     .konfetti {
       position: fixed;
       top: -30px;
@@ -288,12 +289,13 @@
       // --- Quiz ---
       // richtig: Nummer der richtigen Antwort (Zählung beginnt bei 0!)
       //          "alle" = jede Antwort ist richtig
-      // flieht:  Nummer einer Antwort, die vor dem Finger wegläuft 😄
+      // flieht:  Nummer einer Antwort, die vor dem Finger wegläuft 😄 (mehrere: [0, 1])
+      // hintergrund: optional, ersetzt bei dieser Frage die Herzen im Hintergrund (z.B. "67")
       // bild:    optional, z.B. "fotos/1.jpg" (Foto in den Ordner "fotos" legen)
       fragen: [
         {
           frage: "Wo haben wir uns kennengelernt?",
-          antworten: ["Im Urlaub", "Auf einer Party", "In der Schule", "Auf Tinder 😏"],
+          antworten: ["Im Urlaub", "Auf einer Party", "In der Schule", "Auf Tinder 😜"],
           richtig: 2,
           erinnerung: "In der Oberstufe. Wir hatten sogar ein paar Kurse zusammen. Wer hätte damals gedacht, was daraus wird? 🏫"
         },
@@ -307,11 +309,11 @@
           frage: "Wo haben wir vor dem Abi gefühlt die meiste Zeit verbracht?",
           antworten: ["Am See", "In der Bib", "Im Café", "Gar nicht, wir sind Naturtalente"],
           richtig: 1,
-          erinnerung: "Stundenlang in der Bib … und ganz ehrlich: Ich habe da wahrscheinlich öfter zu dir rübergeschaut als in meine Unterlagen. 🙈"
+          erinnerung: "Stundenlang in der Bib … und ehrlich gesagt habe ich da wahrscheinlich öfter zu dir rübergeschaut als in meine Unterlagen. 🙈"
         },
         {
           frage: "Was haben wir bei unserem ersten Date gemacht?",
-          antworten: ["Kino 🍿", "Essen gehen", "Spazieren gehen", "Eis essen 🍦"],
+          antworten: ["Kino 🍿", "Essen gehen", "Spazieren gehen", "Eis essen 👉"],
           richtig: 2,
           erinnerung: "Genau die Runde, die wir heute immer noch regelmäßig laufen. Seitdem ist sie unsere Runde. 🍂"
         },
@@ -326,13 +328,14 @@
           antworten: ["Du natürlich! 😎", "Ein Taxi", "Der Bus", "Niemand, Autofahren ist gruselig 😱"],
           richtig: 0,
           flieht: 3,
-          erinnerung: "Seit deinem Urlaub fährst du viel besser, und ich bin echt stolz auf dich! Versprochen ist versprochen: Ich warte auf meine Fahrt. 😄"
+          hintergrund: "67",
+          erinnerung: "Seit deinem Urlaub fährst du viel besser, und ich bin echt stolz auf dich! Versprochen ist versprochen: Ich warte auf meine Fahrt. ☺️"
         },
         {
           frage: "Wie sehr liebe ich dich?",
           antworten: ["Ein bisschen", "Ganz okay", "Mehr als alles auf der Welt"],
           richtig: 2,
-          flieht: 0,
+          flieht: [0, 1],
           erinnerung: "Und jeden Tag ein kleines bisschen mehr. ❤️"
         }
       ],
@@ -342,10 +345,10 @@
       brief: [
         "alles, alles Gute zu deinem Geburtstag!",
         "Wenn ich an die vielen Stunden in der Bib denke, in denen wir angeblich nur fürs Abi gelernt haben, muss ich lächeln. Heute weiß ich: Das war die beste Lernzeit meines Lebens.",
-        "Seit dem 25. Juli bist du offiziell meine Freundin. Und auch wenn zwischen Darmstadt und Konstanz gerade viele Kilometer liegen und du ständig irgendwo unterwegs bist: Ich freue mich auf jedes einzelne Wochenende mit dir. Ganz besonders auf unsere Runde und unsere Bank.",
+        "Seit dem 25. Juli bist du offiziell meine Freundin. Und auch wenn zwischen Darmstadt und Konstanz gerade viele Kilometer liegen und du ständig irgendwo unterwegs bist, freue ich mich auf jedes einzelne Wochenende mit dir. Ganz besonders auf unsere Runde und unsere Bank.",
         "Danke, dass du so bist, wie du bist. Ich bin unglaublich froh, dich zu haben."
       ],
-      briefGruss: "In Liebe, dein ❤️",
+      briefGruss: "In Liebe, dein Andreas ❤️",
 
       // --- Geschenk ---
       geschenkTitel: "Gutschein 🚆",
@@ -418,13 +421,20 @@
       document.getElementById("erinnerung").classList.add("versteckt");
       document.getElementById("weiter").classList.add("versteckt");
 
+      // Sonder-Symbole der vorherigen Frage entfernen, eigene starten
+      document.querySelectorAll(".sonder").forEach(el => el.remove());
+      if (f.hintergrund) {
+        document.querySelectorAll(".schwebeherz").forEach(el => el.remove());
+        herzenRegen(20);
+      }
+
       const box = document.getElementById("antworten");
       box.innerHTML = "";
       f.antworten.forEach((antwort, nr) => {
         const knopf = document.createElement("button");
         knopf.className = "antwort";
         knopf.textContent = antwort;
-        if (f.flieht === nr) {
+        if ([].concat(f.flieht).includes(nr)) {
           knopf.addEventListener("pointerenter", () => weglaufen(knopf));
           knopf.addEventListener("pointerdown", e => { e.preventDefault(); weglaufen(knopf); });
           knopf.addEventListener("click", e => e.preventDefault());
@@ -486,6 +496,7 @@
 
     function naechsteFrage() {
       frageNummer++;
+      document.querySelectorAll(".sonder").forEach(el => el.remove());
       if (frageNummer < INHALT.fragen.length) {
         frageAnzeigen();
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -544,12 +555,21 @@
     }
 
     // ----- Effekte -----
+    // Hat die aktuelle Frage ein eigenes Hintergrund-Symbol (z.B. "67")?
+    function sonderSymbol() {
+      if (document.getElementById("quiz").classList.contains("versteckt")) return null;
+      const f = INHALT.fragen[frageNummer];
+      return f && f.hintergrund ? f.hintergrund : null;
+    }
+
     function herzenRegen(anzahl) {
       const herzen = ["❤️", "💕", "💖", "💗", "🌸"];
       for (let i = 0; i < anzahl; i++) {
         const h = document.createElement("div");
         h.className = "schwebeherz";
-        h.textContent = herzen[i % herzen.length];
+        const sonder = sonderSymbol();
+        h.textContent = sonder || herzen[i % herzen.length];
+        if (sonder) { h.style.color = "#e8a0b4"; h.style.fontWeight = "700"; h.classList.add("sonder"); }
         h.style.left = Math.random() * 100 + "vw";
         h.style.fontSize = (14 + Math.random() * 22) + "px";
         h.style.opacity = 0.7;
@@ -582,7 +602,9 @@
       if (document.hidden) return;
       const h = document.createElement("div");
       h.className = "schwebeherz";
-      h.textContent = "♥";
+      const sonder = sonderSymbol();
+      h.textContent = sonder || "♥";
+      if (sonder) { h.style.fontWeight = "700"; h.classList.add("sonder"); }
       h.style.color = "#e8a0b4";
       h.style.left = Math.random() * 100 + "vw";
       h.style.fontSize = (12 + Math.random() * 18) + "px";
