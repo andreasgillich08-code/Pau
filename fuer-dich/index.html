@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Nur für dich ❤️</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,500&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ===== Farben: hier lässt sich das ganze Design ändern ===== */
+    :root {
+      --hintergrund: #fdf3ee;
+      --karte: #ffffff;
+      --text: #3d2830;
+      --leise: #96808a;
+      --akzent: #c8466b;
+      --akzent-hell: #fbe4ea;
+      --richtig: #2f9e6a;
+      --falsch: #d0534f;
+      --papier: #fffaf2;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: var(--hintergrund);
+      color: var(--text);
+      font-family: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow-x: hidden;
+    }
+
+    h1, h2 { font-family: "Playfair Display", Georgia, serif; font-weight: 600; margin: 0 0 10px; }
+    h1 { font-size: 1.9rem; line-height: 1.2; }
+    h2 { font-size: 1.45rem; line-height: 1.3; }
+    p  { line-height: 1.6; margin: 0 0 12px; }
+
+    .karte {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 460px;
+      background: var(--karte);
+      border-radius: 24px;
+      padding: 32px 22px;
+      box-shadow: 0 14px 40px rgba(200, 70, 107, 0.16);
+      text-align: center;
+    }
+
+    .gross { font-size: 3.4rem; line-height: 1; margin-bottom: 14px; }
+    .leise { color: var(--leise); font-size: 0.92rem; }
+    .versteckt { display: none !important; }
+
+    .einblenden { animation: einblenden 0.5s ease both; }
+    @keyframes einblenden { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+    button { font: inherit; cursor: pointer; border: none; border-radius: 14px; color: inherit; }
+
+    .haupt-button {
+      background: var(--akzent);
+      color: #fff;
+      font-weight: 700;
+      padding: 14px 30px;
+      margin-top: 14px;
+      box-shadow: 0 6px 16px rgba(200, 70, 107, 0.3);
+      transition: transform 0.1s;
+    }
+    .haupt-button:active { transform: scale(0.97); }
+
+    /* ----- Schloss ----- */
+    .eingabe {
+      width: 100%;
+      font: inherit;
+      font-size: 1.1rem;
+      text-align: center;
+      padding: 14px;
+      margin-top: 8px;
+      border: 2px solid var(--akzent-hell);
+      border-radius: 14px;
+      outline: none;
+      background: #fff;
+      color: var(--text);
+    }
+    .eingabe:focus { border-color: var(--akzent); }
+    .wackeln { animation: wackeln 0.4s; }
+    @keyframes wackeln {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+    .meldung { min-height: 1.6em; font-weight: 700; margin-top: 12px; color: var(--falsch); }
+
+    /* ----- Quiz ----- */
+    .balken { height: 8px; background: var(--akzent-hell); border-radius: 99px; overflow: hidden; margin-bottom: 18px; }
+    .balken-fuellung { height: 100%; width: 0; background: var(--akzent); transition: width 0.5s; }
+    .antworten { display: grid; gap: 10px; margin-top: 18px; }
+    .antwort {
+      position: relative;
+      background: var(--akzent-hell);
+      padding: 14px 16px;
+      text-align: left;
+      border: 2px solid transparent;
+      transition: transform 0.25s, background 0.2s;
+    }
+    .antwort.richtig { background: #e2f5eb; border-color: var(--richtig); }
+    .antwort.falsch  { background: #fbe6e5; border-color: var(--falsch); opacity: 0.6; }
+    .antwort:disabled { cursor: default; }
+
+    .erinnerung {
+      margin-top: 18px;
+      padding: 16px;
+      background: var(--papier);
+      border-radius: 16px;
+      border: 1px dashed #e9c9d2;
+      text-align: left;
+    }
+    .erinnerung img { width: 100%; border-radius: 12px; margin-bottom: 10px; display: block; }
+    .erinnerung p { margin: 0; }
+
+    /* ----- Brief ----- */
+    .umschlag {
+      font-size: 5.5rem;
+      background: none;
+      animation: pochen 1.4s ease-in-out infinite;
+      padding: 0;
+    }
+    @keyframes pochen { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+
+    .brief {
+      text-align: left;
+      background: var(--papier);
+      border-radius: 18px;
+      padding: 26px 22px;
+      box-shadow: inset 0 0 0 1px #f0dfd0;
+    }
+    .brief p { font-size: 1.04rem; }
+    .brief .anrede, .brief .gruss {
+      font-family: "Playfair Display", Georgia, serif;
+      font-style: italic;
+      font-size: 1.2rem;
+    }
+    .brief .gruss { margin-top: 20px; text-align: right; }
+
+    /* ----- Geschenk ----- */
+    .geschenk {
+      font-size: 6rem;
+      background: none;
+      padding: 0;
+      line-height: 1;
+    }
+    .geschenk.ruetteln { animation: ruetteln 0.5s; }
+    @keyframes ruetteln {
+      0%, 100% { transform: rotate(0); }
+      20% { transform: rotate(-14deg) scale(1.05); }
+      40% { transform: rotate(12deg) scale(1.1); }
+      60% { transform: rotate(-8deg) scale(1.1); }
+      80% { transform: rotate(6deg); }
+    }
+    .gutschein {
+      margin-top: 8px;
+      padding: 22px 18px;
+      border: 2px dashed var(--akzent);
+      border-radius: 18px;
+      background: var(--papier);
+    }
+    .link-button { background: none; color: var(--leise); text-decoration: underline; margin-top: 18px; padding: 6px; }
+
+    /* ----- Herzen im Hintergrund & Konfetti ----- */
+    .schwebeherz {
+      position: fixed;
+      bottom: -40px;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.35;
+      animation: aufsteigen linear forwards;
+    }
+    @keyframes aufsteigen {
+      to { transform: translateY(-115vh) rotate(25deg); opacity: 0; }
+    }
+    .konfetti {
+      position: fixed;
+      top: -30px;
+      z-index: 5;
+      pointer-events: none;
+      animation: fallen linear forwards;
+    }
+    @keyframes fallen { to { transform: translateY(115vh) rotate(540deg); } }
+  </style>
+</head>
+<body>
+
+  <main class="karte" id="karte">
+
+    <!-- ===== 1. Schloss ===== -->
+    <section id="schloss" class="einblenden">
+      <div class="gross">🔒</div>
+      <h1>Nur für dich</h1>
+      <p class="leise">Diese Seite öffnet sich nur mit dem richtigen Schlüssel.</p>
+      <p id="schloss-frage" style="font-weight:700; margin-top:18px;"></p>
+      <input id="schloss-eingabe" class="eingabe" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <p class="meldung" id="schloss-meldung"></p>
+      <button class="haupt-button" onclick="schlossPruefen()">Öffnen</button>
+    </section>
+
+    <!-- ===== 2. Begrüßung ===== -->
+    <section id="begruessung" class="versteckt">
+      <div class="gross">🎂</div>
+      <h1 id="begruessung-titel"></h1>
+      <p id="begruessung-text"></p>
+      <button class="haupt-button" onclick="quizStarten()">Ich bin bereit ✨</button>
+    </section>
+
+    <!-- ===== 3. Quiz ===== -->
+    <section id="quiz" class="versteckt">
+      <div class="balken"><div class="balken-fuellung" id="fortschritt"></div></div>
+      <p class="leise" id="zaehler"></p>
+      <h2 id="frage"></h2>
+      <div class="antworten" id="antworten"></div>
+      <p class="meldung" id="quiz-meldung"></p>
+      <div class="erinnerung versteckt" id="erinnerung"></div>
+      <button class="haupt-button versteckt" id="weiter" onclick="naechsteFrage()">Weiter</button>
+    </section>
+
+    <!-- ===== 4. Brief ===== -->
+    <section id="umschlag-bereich" class="versteckt">
+      <h2>Du hast Post</h2>
+      <p class="leise" id="quiz-ergebnis"></p>
+      <button class="umschlag" onclick="briefOeffnen()" aria-label="Brief öffnen">💌</button>
+      <p class="leise">Tippe auf den Umschlag</p>
+    </section>
+
+    <section id="brief-bereich" class="versteckt">
+      <div class="brief" id="brief"></div>
+      <button class="haupt-button" onclick="zeige('geschenk-bereich')">Da ist noch etwas … 🎁</button>
+    </section>
+
+    <!-- ===== 5. Geschenk ===== -->
+    <section id="geschenk-bereich" class="versteckt">
+      <h2>Dein Geschenk</h2>
+      <button class="geschenk" id="geschenk" onclick="geschenkAntippen()" aria-label="Geschenk öffnen">🎁</button>
+      <p class="leise" id="geschenk-hinweis">Tippe 3× auf das Geschenk</p>
+    </section>
+
+    <section id="ueberraschung" class="versteckt">
+      <div class="gross">🥳</div>
+      <div class="gutschein">
+        <h2 id="geschenk-titel"></h2>
+        <p id="geschenk-text" style="margin:0;"></p>
+      </div>
+      <p style="margin-top:22px;" id="schluss-text"></p>
+      <button class="link-button" onclick="vonVorne()">Nochmal von vorne</button>
+    </section>
+
+  </main>
+
+  <script>
+    /* ==================================================================
+       ALLE PERSÖNLICHEN INHALTE STEHEN HIER.
+       Nur Text zwischen den "Anführungszeichen" ändern.
+       ================================================================== */
+
+    const INHALT = {
+      name: "Schatz",
+
+      // --- Schloss ---
+      schlossFrage: "Wann ist unser Jahrestag? (TT.MM.JJJJ)",
+      // Alle Schreibweisen, die akzeptiert werden. Groß/klein und Leerzeichen sind egal.
+      schluessel: ["01.01.2024", "1.1.2024"],
+
+      // --- Begrüßung ---
+      begruessungTitel: "Alles Gute zum Geburtstag, Schatz! 🎉",
+      begruessungText: "Ich habe dir etwas gebaut. Aber bevor du dein Geschenk bekommst, " +
+                       "musst du ein paar Fragen über uns beantworten. Keine Sorge, du kannst nichts falsch machen … oder doch? 😏",
+
+      // --- Quiz ---
+      // richtig: Nummer der richtigen Antwort (Zählung beginnt bei 0!)
+      //          "alle" = jede Antwort ist richtig
+      // flieht:  Nummer einer Antwort, die vor dem Finger wegläuft 😄
+      // bild:    optional, z.B. "fotos/1.jpg" (Foto in den Ordner "fotos" legen)
+      fragen: [
+        {
+          frage: "Wo haben wir uns zum ersten Mal gesehen?",
+          antworten: ["Im Café", "Auf einer Party", "In der Schule", "Über Freunde"],
+          richtig: 1,
+          erinnerung: "Ich weiß noch genau, wie du an dem Abend ausgesehen hast. Ich konnte nicht aufhören, zu dir rüberzuschauen."
+        },
+        {
+          frage: "Was haben wir bei unserem ersten Date gemacht?",
+          antworten: ["Kino", "Spazieren gehen", "Essen gehen", "Eis essen"],
+          richtig: 2,
+          erinnerung: "Ich war so nervös, dass ich kaum etwas gegessen habe. Aber es war der schönste Abend seit Langem."
+        },
+        {
+          frage: "Welches Essen könntest du jeden Tag essen?",
+          antworten: ["Pizza", "Sushi", "Pasta", "Burger"],
+          richtig: 0,
+          erinnerung: "Und ich liebe es, wie sehr du dich jedes Mal darüber freust. 🍕"
+        },
+        {
+          frage: "Was liebe ich am meisten an dir?",
+          antworten: ["Dein Lachen", "Deine Augen", "Deine Art", "Wie du mich verstehst"],
+          richtig: "alle",
+          erinnerung: "Fangfrage: Alles davon ist richtig. Ich könnte mich gar nicht für eins entscheiden. ❤️"
+        },
+        {
+          frage: "Wie sehr liebe ich dich?",
+          antworten: ["Ein bisschen", "Ganz okay", "Mehr als alles auf der Welt"],
+          richtig: 2,
+          flieht: 0,
+          erinnerung: "Und jeden Tag ein kleines bisschen mehr."
+        }
+      ],
+
+      // --- Brief (jeder Eintrag ist ein Absatz) ---
+      briefAnrede: "Mein Schatz,",
+      brief: [
+        "heute ist dein Tag, und ich wollte dir etwas schenken, das es nur ein einziges Mal gibt: diese kleine Seite, nur für dich.",
+        "Danke, dass du in meinem Leben bist. Mit dir ist alles ein bisschen heller, lustiger und wärmer.",
+        "Ich freue mich auf alles, was noch vor uns liegt."
+      ],
+      briefGruss: "In Liebe, dein ❤️",
+
+      // --- Geschenk ---
+      geschenkTitel: "Gutschein",
+      geschenkText: "für einen ganzen Tag nur für uns zwei. Du bestimmst, was wir machen!",
+      schlussText: "Happy Birthday! Ich liebe dich. ❤️"
+    };
+
+    /* ==================================================================
+       Ab hier: Spiel-Logik (muss normalerweise nicht geändert werden)
+       ================================================================== */
+
+    const BEREICHE = ["schloss", "begruessung", "quiz", "umschlag-bereich", "brief-bereich", "geschenk-bereich", "ueberraschung"];
+    let frageNummer = 0;
+    let fehlversuche = 0;
+    let geschenkTipps = 0;
+
+    function zeige(id) {
+      for (const b of BEREICHE) {
+        const el = document.getElementById(b);
+        el.classList.toggle("versteckt", b !== id);
+        el.classList.remove("einblenden");
+      }
+      const ziel = document.getElementById(id);
+      void ziel.offsetWidth; // Animation neu starten
+      ziel.classList.add("einblenden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function text(id, inhalt) { document.getElementById(id).textContent = inhalt; }
+
+    // ----- Schloss -----
+    function normalisieren(s) { return s.toLowerCase().replace(/[^a-z0-9äöüß]/g, ""); }
+
+    function schlossPruefen() {
+      const eingabe = document.getElementById("schloss-eingabe");
+      const passt = INHALT.schluessel.some(k => normalisieren(k) === normalisieren(eingabe.value));
+      if (passt) {
+        document.querySelector("#schloss .gross").textContent = "🔓";
+        text("schloss-meldung", "");
+        herzenRegen(25);
+        setTimeout(() => zeige("begruessung"), 700);
+      } else {
+        const meldungen = ["Hmm, das war's nicht 🤔", "Nope 🙈 Nochmal!", "Fast … oder? 😅"];
+        text("schloss-meldung", meldungen[Math.floor(Math.random() * meldungen.length)]);
+        eingabe.classList.remove("wackeln");
+        void eingabe.offsetWidth;
+        eingabe.classList.add("wackeln");
+      }
+    }
+
+    document.getElementById("schloss-eingabe").addEventListener("keydown", e => {
+      if (e.key === "Enter") schlossPruefen();
+    });
+
+    // ----- Quiz -----
+    function quizStarten() {
+      frageNummer = 0;
+      fehlversuche = 0;
+      zeige("quiz");
+      frageAnzeigen();
+    }
+
+    function frageAnzeigen() {
+      const f = INHALT.fragen[frageNummer];
+      text("zaehler", `Frage ${frageNummer + 1} von ${INHALT.fragen.length}`);
+      text("frage", f.frage);
+      text("quiz-meldung", "");
+      document.getElementById("fortschritt").style.width = (frageNummer / INHALT.fragen.length * 100) + "%";
+      document.getElementById("erinnerung").classList.add("versteckt");
+      document.getElementById("weiter").classList.add("versteckt");
+
+      const box = document.getElementById("antworten");
+      box.innerHTML = "";
+      f.antworten.forEach((antwort, nr) => {
+        const knopf = document.createElement("button");
+        knopf.className = "antwort";
+        knopf.textContent = antwort;
+        if (f.flieht === nr) {
+          knopf.addEventListener("pointerenter", () => weglaufen(knopf));
+          knopf.addEventListener("pointerdown", e => { e.preventDefault(); weglaufen(knopf); });
+          knopf.addEventListener("click", e => e.preventDefault());
+        } else {
+          knopf.addEventListener("click", () => antwortGeklickt(nr, knopf));
+        }
+        box.appendChild(knopf);
+      });
+    }
+
+    function weglaufen(knopf) {
+      if (knopf.disabled) return;
+      const x = (Math.random() * 2 - 1) * 70;
+      const y = (Math.random() * 2 - 1) * 60;
+      knopf.style.transform = `translate(${x}px, ${y}px) rotate(${x / 8}deg)`;
+      text("quiz-meldung", ["Nö! 😜", "Zu langsam! 🏃‍♂️", "Netter Versuch 😏"][Math.floor(Math.random() * 3)]);
+    }
+
+    function antwortGeklickt(nr, knopf) {
+      const f = INHALT.fragen[frageNummer];
+      const istRichtig = f.richtig === "alle" || f.richtig === nr;
+
+      if (!istRichtig) {
+        fehlversuche++;
+        knopf.classList.add("falsch");
+        knopf.disabled = true;
+        text("quiz-meldung", ["Falsch! Das muss ich mir merken … 😤", "Echt jetzt? 🙈", "Nochmal überlegen! 🤭"][Math.floor(Math.random() * 3)]);
+        return;
+      }
+
+      document.querySelectorAll(".antwort").forEach(k => {
+        k.disabled = true;
+        k.style.transform = "";
+      });
+      knopf.classList.add("richtig");
+      text("quiz-meldung", "");
+      herzenRegen(12);
+
+      const box = document.getElementById("erinnerung");
+      box.innerHTML = "";
+      if (f.bild) {
+        const bild = document.createElement("img");
+        bild.src = f.bild;
+        bild.alt = "";
+        box.appendChild(bild);
+      }
+      const absatz = document.createElement("p");
+      absatz.textContent = f.erinnerung;
+      box.appendChild(absatz);
+      box.classList.remove("versteckt");
+      box.classList.remove("einblenden");
+      void box.offsetWidth;
+      box.classList.add("einblenden");
+
+      const weiter = document.getElementById("weiter");
+      weiter.textContent = frageNummer === INHALT.fragen.length - 1 ? "Fertig! 💌" : "Weiter";
+      weiter.classList.remove("versteckt");
+    }
+
+    function naechsteFrage() {
+      frageNummer++;
+      if (frageNummer < INHALT.fragen.length) {
+        frageAnzeigen();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        text("quiz-ergebnis", fehlversuche === 0
+          ? "Alles beim ersten Versuch richtig. Du kennst uns perfekt! 🏆"
+          : `Geschafft! (Mit nur ${fehlversuche} kleinen Ausrutscher${fehlversuche === 1 ? "" : "n"} 😉)`);
+        zeige("umschlag-bereich");
+      }
+    }
+
+    // ----- Brief -----
+    function briefOeffnen() {
+      const brief = document.getElementById("brief");
+      brief.innerHTML = "";
+      const anrede = document.createElement("p");
+      anrede.className = "anrede";
+      anrede.textContent = INHALT.briefAnrede;
+      brief.appendChild(anrede);
+      for (const absatzText of INHALT.brief) {
+        const p = document.createElement("p");
+        p.textContent = absatzText;
+        brief.appendChild(p);
+      }
+      const gruss = document.createElement("p");
+      gruss.className = "gruss";
+      gruss.textContent = INHALT.briefGruss;
+      brief.appendChild(gruss);
+      zeige("brief-bereich");
+    }
+
+    // ----- Geschenk -----
+    function geschenkAntippen() {
+      geschenkTipps++;
+      const g = document.getElementById("geschenk");
+      g.classList.remove("ruetteln");
+      void g.offsetWidth;
+      g.classList.add("ruetteln");
+
+      const rest = 3 - geschenkTipps;
+      if (rest > 0) {
+        text("geschenk-hinweis", rest === 2 ? "Noch 2× … 👀" : "Noch 1× … 🤩");
+      } else {
+        setTimeout(() => {
+          zeige("ueberraschung");
+          konfetti();
+          herzenRegen(40);
+        }, 450);
+      }
+    }
+
+    function vonVorne() {
+      geschenkTipps = 0;
+      text("geschenk-hinweis", "Tippe 3× auf das Geschenk");
+      zeige("begruessung");
+    }
+
+    // ----- Effekte -----
+    function herzenRegen(anzahl) {
+      const herzen = ["❤️", "💕", "💖", "💗", "🌸"];
+      for (let i = 0; i < anzahl; i++) {
+        const h = document.createElement("div");
+        h.className = "schwebeherz";
+        h.textContent = herzen[i % herzen.length];
+        h.style.left = Math.random() * 100 + "vw";
+        h.style.fontSize = (14 + Math.random() * 22) + "px";
+        h.style.opacity = 0.7;
+        h.style.animationDuration = (3 + Math.random() * 3) + "s";
+        h.style.animationDelay = Math.random() * 0.8 + "s";
+        document.body.appendChild(h);
+        setTimeout(() => h.remove(), 7000);
+      }
+    }
+
+    function konfetti() {
+      const farben = ["#c8466b", "#f4a261", "#ffd6e0", "#e9c46a", "#b5838d", "#ff8fab"];
+      for (let i = 0; i < 120; i++) {
+        const k = document.createElement("div");
+        k.className = "konfetti";
+        k.style.left = Math.random() * 100 + "vw";
+        k.style.width = (6 + Math.random() * 6) + "px";
+        k.style.height = (10 + Math.random() * 8) + "px";
+        k.style.background = farben[i % farben.length];
+        k.style.borderRadius = Math.random() > 0.5 ? "50%" : "2px";
+        k.style.animationDuration = (2.5 + Math.random() * 2.5) + "s";
+        k.style.animationDelay = Math.random() * 0.6 + "s";
+        document.body.appendChild(k);
+        setTimeout(() => k.remove(), 6000);
+      }
+    }
+
+    // Leise schwebende Herzen im Hintergrund
+    setInterval(() => {
+      if (document.hidden) return;
+      const h = document.createElement("div");
+      h.className = "schwebeherz";
+      h.textContent = "♥";
+      h.style.color = "#e8a0b4";
+      h.style.left = Math.random() * 100 + "vw";
+      h.style.fontSize = (12 + Math.random() * 18) + "px";
+      h.style.animationDuration = (9 + Math.random() * 6) + "s";
+      document.body.appendChild(h);
+      setTimeout(() => h.remove(), 16000);
+    }, 1400);
+
+    // Texte einsetzen
+    text("schloss-frage", INHALT.schlossFrage);
+    text("begruessung-titel", INHALT.begruessungTitel);
+    text("begruessung-text", INHALT.begruessungText);
+    text("geschenk-titel", INHALT.geschenkTitel);
+    text("geschenk-text", INHALT.geschenkText);
+    text("schluss-text", INHALT.schlussText);
+  </script>
+
+</body>
+</html>
