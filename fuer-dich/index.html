@@ -214,6 +214,7 @@
     <section id="begruessung" class="versteckt">
       <div class="gross">🎂</div>
       <h1 id="begruessung-titel"></h1>
+      <p class="leise" id="tage-zaehler"></p>
       <p id="begruessung-text"></p>
       <button class="haupt-button" onclick="quizStarten()">Ich bin bereit ✨</button>
     </section>
@@ -268,17 +269,21 @@
        ================================================================== */
 
     const INHALT = {
-      name: "Schatz",
+      name: "Pauline",
+
+      // Tag, an dem wir zusammengekommen sind (Jahr-Monat-Tag) → für den Tage-Zähler
+      zusammenSeit: "2026-07-25",
 
       // --- Schloss ---
-      schlossFrage: "Wann ist unser Jahrestag? (TT.MM.JJJJ)",
-      // Alle Schreibweisen, die akzeptiert werden. Groß/klein und Leerzeichen sind egal.
-      schluessel: ["01.01.2024", "1.1.2024"],
+      schlossFrage: "Seit wann sind wir zusammen? (TT.MM.JJJJ)",
+      // Alle Schreibweisen, die akzeptiert werden. Punkte, Leerzeichen und Groß/klein sind egal.
+      schluessel: ["25.07.2026", "25.7.2026", "25.07.26", "25.7.26"],
 
       // --- Begrüßung ---
-      begruessungTitel: "Alles Gute zum Geburtstag, Schatz! 🎉",
+      begruessungTitel: "Alles Gute zum Geburtstag, Pauline! 🎉",
       begruessungText: "Ich habe dir etwas gebaut. Aber bevor du dein Geschenk bekommst, " +
-                       "musst du ein paar Fragen über uns beantworten. Keine Sorge, du kannst nichts falsch machen … oder doch? 😏",
+                       "musst du ein paar Fragen über uns beantworten. Die meisten solltest du locker wissen … " +
+                       "bei manchen musst du vielleicht kurz überlegen. 😏",
 
       // --- Quiz ---
       // richtig: Nummer der richtigen Antwort (Zählung beginnt bei 0!)
@@ -287,51 +292,66 @@
       // bild:    optional, z.B. "fotos/1.jpg" (Foto in den Ordner "fotos" legen)
       fragen: [
         {
-          frage: "Wo haben wir uns zum ersten Mal gesehen?",
-          antworten: ["Im Café", "Auf einer Party", "In der Schule", "Über Freunde"],
+          frage: "Wo haben wir uns kennengelernt?",
+          antworten: ["Im Urlaub", "Auf einer Party", "In der Schule", "Auf Tinder 😏"],
+          richtig: 2,
+          erinnerung: "In der Oberstufe. Wir hatten sogar ein paar Kurse zusammen. Wer hätte damals gedacht, was daraus wird? 🏫"
+        },
+        {
+          frage: "Was haben wir schon gemacht, bevor wir zusammen waren?",
+          antworten: ["Skifahren ⛷️", "Kajak fahren 🛶", "Zusammen fürs Abi lernen 📚", "Alles davon"],
+          richtig: 3,
+          erinnerung: "Eigentlich waren wir schon lange ein ziemlich gutes Team. Wir wussten es nur noch nicht."
+        },
+        {
+          frage: "Wo haben wir vor dem Abi gefühlt die meiste Zeit verbracht?",
+          antworten: ["Am See", "In der Bib", "Im Café", "Gar nicht, wir sind Naturtalente"],
           richtig: 1,
-          erinnerung: "Ich weiß noch genau, wie du an dem Abend ausgesehen hast. Ich konnte nicht aufhören, zu dir rüberzuschauen."
+          erinnerung: "Stundenlang in der Bib … und ganz ehrlich: Ich habe da wahrscheinlich öfter zu dir rübergeschaut als in meine Unterlagen. 🙈"
         },
         {
           frage: "Was haben wir bei unserem ersten Date gemacht?",
-          antworten: ["Kino", "Spazieren gehen", "Essen gehen", "Eis essen"],
+          antworten: ["Kino 🍿", "Essen gehen", "Spazieren gehen", "Eis essen 🍦"],
           richtig: 2,
-          erinnerung: "Ich war so nervös, dass ich kaum etwas gegessen habe. Aber es war der schönste Abend seit Langem."
+          erinnerung: "Genau die Runde, die wir heute immer noch regelmäßig laufen. Seitdem ist sie unsere Runde. 🍂"
         },
         {
-          frage: "Welches Essen könntest du jeden Tag essen?",
-          antworten: ["Pizza", "Sushi", "Pasta", "Burger"],
+          frage: "Und wo machen wir auf unserer Runde immer Pause?",
+          antworten: ["Beim Bäcker 🥐", "Auf unserer Bank 🪑", "Am Kiosk", "Nirgends, wir sind Profis"],
+          richtig: 1,
+          erinnerung: "Unsere Bank mitten auf dem Weg. Eine ganz normale Bank, aber für mich eine der schönsten Stellen überhaupt."
+        },
+        {
+          frage: "Wer kutschiert mich bald endlich mal mit dem Babawagen rum? 🚗",
+          antworten: ["Du natürlich! 😎", "Ein Taxi", "Der Bus", "Niemand, Autofahren ist gruselig 😱"],
           richtig: 0,
-          erinnerung: "Und ich liebe es, wie sehr du dich jedes Mal darüber freust. 🍕"
-        },
-        {
-          frage: "Was liebe ich am meisten an dir?",
-          antworten: ["Dein Lachen", "Deine Augen", "Deine Art", "Wie du mich verstehst"],
-          richtig: "alle",
-          erinnerung: "Fangfrage: Alles davon ist richtig. Ich könnte mich gar nicht für eins entscheiden. ❤️"
+          flieht: 3,
+          erinnerung: "Seit deinem Urlaub fährst du viel besser, und ich bin echt stolz auf dich! Versprochen ist versprochen: Ich warte auf meine Fahrt. 😄"
         },
         {
           frage: "Wie sehr liebe ich dich?",
           antworten: ["Ein bisschen", "Ganz okay", "Mehr als alles auf der Welt"],
           richtig: 2,
           flieht: 0,
-          erinnerung: "Und jeden Tag ein kleines bisschen mehr."
+          erinnerung: "Und jeden Tag ein kleines bisschen mehr. ❤️"
         }
       ],
 
       // --- Brief (jeder Eintrag ist ein Absatz) ---
-      briefAnrede: "Mein Schatz,",
+      briefAnrede: "Liebe Pauline,",
       brief: [
-        "heute ist dein Tag, und ich wollte dir etwas schenken, das es nur ein einziges Mal gibt: diese kleine Seite, nur für dich.",
-        "Danke, dass du in meinem Leben bist. Mit dir ist alles ein bisschen heller, lustiger und wärmer.",
-        "Ich freue mich auf alles, was noch vor uns liegt."
+        "alles, alles Gute zu deinem Geburtstag!",
+        "Wenn ich an die vielen Stunden in der Bib denke, in denen wir angeblich nur fürs Abi gelernt haben, muss ich lächeln. Heute weiß ich: Das war die beste Lernzeit meines Lebens.",
+        "Seit dem 25. Juli bist du offiziell meine Freundin. Und auch wenn zwischen Darmstadt und Konstanz gerade viele Kilometer liegen und du ständig irgendwo unterwegs bist: Ich freue mich auf jedes einzelne Wochenende mit dir. Ganz besonders auf unsere Runde und unsere Bank.",
+        "Danke, dass du so bist, wie du bist. Ich bin unglaublich froh, dich zu haben."
       ],
       briefGruss: "In Liebe, dein ❤️",
 
       // --- Geschenk ---
-      geschenkTitel: "Gutschein",
-      geschenkText: "für einen ganzen Tag nur für uns zwei. Du bestimmst, was wir machen!",
-      schlussText: "Happy Birthday! Ich liebe dich. ❤️"
+      geschenkTitel: "Gutschein 🚆",
+      geschenkText: "für ein Wochenende bei mir in Darmstadt! Ich zeige dir meine neue Stadt und meine Lieblingsorte, und wir machen es uns richtig schön. " +
+                    "(Und wenn du dich traust, darfst du auch gern mit dem Babawagen kommen 🚗😉)",
+      schlussText: "Happy Birthday, Pauline! Ich liebe dich. ❤️"
     };
 
     /* ==================================================================
@@ -575,6 +595,14 @@
     text("schloss-frage", INHALT.schlossFrage);
     text("begruessung-titel", INHALT.begruessungTitel);
     text("begruessung-text", INHALT.begruessungText);
+
+    // Wie viele Tage sind wir schon zusammen?
+    (function () {
+      const [j, m, t] = INHALT.zusammenSeit.split("-").map(Number);
+      const h = new Date();
+      const tage = Math.round((Date.UTC(h.getFullYear(), h.getMonth(), h.getDate()) - Date.UTC(j, m - 1, t)) / 86400000);
+      if (tage > 0) text("tage-zaehler", `💞 Wir sind seit ${tage} Tagen zusammen 💞`);
+    })();
     text("geschenk-titel", INHALT.geschenkTitel);
     text("geschenk-text", INHALT.geschenkText);
     text("schluss-text", INHALT.schlussText);
